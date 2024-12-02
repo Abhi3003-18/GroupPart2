@@ -1,10 +1,10 @@
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import index as indexRoute
+from .routers import index as indexRoute
 from .models import model_loader
 from .dependencies.config import conf
-from api.controllers import orders as controller
+
 
 
 
