@@ -1,15 +1,18 @@
-import uvicorn
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import index as indexRoute
-from .models import model_loader
+from .models import model_loader, customers, menu_items, order_details, orders, payments, promotions, rating_reviews, recipes, resources, sandwiches
 from .dependencies.config import conf
+from .dependencies.database import engine, get_db
+from .controllers import orders, order_details
+from sqlalchemy.orm import Session
 
 
 
 
 
 
+model_loader.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
