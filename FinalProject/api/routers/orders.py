@@ -33,3 +33,15 @@ def update(item_id: int, request: schema.OrderUpdate, db: Session = Depends(get_
 @router.delete("/{item_id}")
 def delete(item_id: int, db: Session = Depends(get_db)):
     return controller.delete(db=db, item_id=item_id)
+
+@router.get("/revenue/", response_model=dict)
+def get_revenue(start_date: str, end_date: str, db: Session = Depends(get_db)):
+    return controller.calculate_revenue(db, start_date=start_date, end_date=end_date)
+
+@router.get("/track/{order_id}", response_model=dict)
+def track_order(order_id: int, db: Session = Depends(get_db)):
+    return track_order(db=db, order_id=order_id)
+
+@router.put("/{order_id}/apply-promo/", response_model=dict)
+def apply_promo(order_id: int, promo_code: str, db: Session = Depends(get_db)):
+    return apply_promo_code(db=db, order_id=order_id, promo_code=promo_code)

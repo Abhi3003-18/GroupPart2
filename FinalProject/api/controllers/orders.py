@@ -66,3 +66,39 @@ def delete(db: Session, item_id):
         error = str(e.__dict__['orig'])
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+def calculate_revenue(db: Session, start_date: str, end_date: str):
+    try:
+        revenue = db.query(func.sum(model.OrderDetail.amount * model.OrderDetail.sandwich.price)) \
+            .join(model.Sandwich, model.OrderDetail.sandwich_id == model.Sandwich.id) \
+            .join(model.Order, model.OrderDetail.order_id == model.Order.id) \
+            .filter(model.Order.date_created >= start_date, model.Order.date_created <= end_date) \
+            .scalar()
+    except SQLAlchemyError as e:
+        error = str(e.__dict__['orig'])
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)
+    return {"revenue": revenue or 0}
+
+def track_order(db: Session, order_id: int):
+    try:
+        order = db.query(model.Order).filter(model.Order.id == order_id).first()
+        if not order:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+    except SQLAlchemyError as e:
+        error = str(e.__dict__['orig'])
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)
+    return {"status": order.status, "estimated_delivery": order.estimated_delivery}
+
+def apply_promo_code(db: Session, order_id: int, promo_code: str):
+    # Validate promo code
+    discount = 10  # Example fixed discount
+    try:
+        order = db.query(model.Order).filter(model.Order.id == order_id).first()
+        if not order:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+        order.total_price = order.total_price - (order.total_price * discount / 100)
+        db.commit()
+    except SQLAlchemyError as e:
+        error = str(e.__dict__['orig'])
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)
+    return {"discounted_price": order.total_price}

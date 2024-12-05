@@ -1,8 +1,7 @@
 from fastapi.testclient import TestClient
-from ..controllers import orders as controller
+from ..controllers import orders as controller, orders as model
 from ..main import app
 import pytest
-from ..models import orders as model
 
 # Create a test client for the app
 client = TestClient(app)
